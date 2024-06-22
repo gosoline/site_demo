@@ -1,0 +1,10 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "django runserver",
+            "type": "shell",
+            "command": "python ${workspaceFolder}/manage.py runserver 8080"
+        }
+    ]
+}

@@ -1,0 +1,6 @@
+# python==3.9.9
+-i https://pypi.tuna.tsinghua.edu.cn/simple
+
+Django==4.2.1
+pyecharts==2.0.3
+pandas==2.2.2

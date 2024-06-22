@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "Python 调试程序: 当前文件",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python 调试程序: Django",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "runserver",
+                "8080",
+            ],
+            "django": true,
+            "autoStartBrowser": false,
+            "program": "${workspaceFolder}/manage.py",
+        },
+        {
+            "type": "msedge",
+            "name": "html debug",
+            "request": "launch",
+            "url": "http://127.0.0.1:5500/${fileBasename}"
+        }
+    ]
+}

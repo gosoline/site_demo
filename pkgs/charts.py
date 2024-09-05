@@ -83,7 +83,38 @@ def scatter_json(data: pd.DataFrame, title: str = '', f_size: int = 15):
     return chart_scatter.dump_options_with_quotes()
 
 
+def bar_json(
+    data: pd.DataFrame,
+    title: str = '',
+    f_size: int = 15,
+):
+    """
+    【柱状图】自动生成前端echarts控件需要的图像选项
+
+    Parameters
+    ----------
+    data : DataFrame ~ 需要绘制的数据
+    title : str, optional ~ 图表标题，会显示在左上角, by default ''
+    f_size : int, optional ~ 图表字体大小, by default 15
+
+    Returns
+    -------
+    str ~ 已被打包好的json文本字符串，前端只要使用JSON.parse即可使用
+    """
+    chart_bar = Bar().add_xaxis(data[data.columns[0]].to_list()).add_yaxis(
+        str(data.columns[1]), data[data.columns[1]].to_list()).set_global_opts(
+            xaxis_opts=opts.AxisOpts(
+                name=str(data.columns[0]),
+                axislabel_opts=opts.LabelOpts(rotate=-15)),
+            yaxis_opts=opts.AxisOpts(name=str(data.columns[1]), ),
+            title_opts=opts.TitleOpts(title=title),
+        )
+    # 测试使用，会渲染成html文件查看效果
+    # chart_bar.render('bar.html')
+    return chart_bar.dump_options_with_quotes()
+
+
 if __name__ == '__main__':
-    df = pd.DataFrame({'x': [1, 2, 3, 4, 5], 'y': [2, 4, 6, 8, 10]})
-    j = scatter_json(df)
+    data = pd.DataFrame({'x': [1, 2, 3, 4, 5], 'y': [2, 4, 6, 8, 10]})
+    j = scatter_json(data)
     print(j)

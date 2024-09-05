@@ -1,2 +1,5 @@
-import numpy as np
-print(np.random.randint(0, 10, (1, 5)))
+import pandas as pd
+
+df=pd.DataFrame({'A':[1,2,3],'B':[4,5,6]})
+print(df)
+print(df.to_string())

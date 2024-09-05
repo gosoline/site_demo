@@ -4,7 +4,8 @@
         {
             "label": "django runserver",
             "type": "shell",
-            "command": "python ${workspaceFolder}/manage.py runserver 8080"
+            "command": "conda activate env_mysite;python ${workspaceFolder}/manage.py runserver 8080"
+            // "command": "get-Command python"
         }
     ]
 }

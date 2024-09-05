@@ -4,3 +4,4 @@
 Django==4.2.1
 pyecharts==2.0.3
 pandas==2.2.2
+loguru==0.7.2

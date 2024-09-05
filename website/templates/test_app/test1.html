@@ -1,0 +1,137 @@
+<!-- @format -->
+<!DOCTYPE html>
+<html>
+    <head>
+        {% load static %}
+        <title>测试网站</title>
+        <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+        <link rel="shortcut icon" href="{% static 'favicon.svg' %}" type="image/x-icon" />
+        <script src="{% static 'js/utils.js' %}"></script>
+        <script src="{% static 'js/jquery.min.js' %}"></script>
+        <script src="{% static 'js/jquery-ui.min.js' %}"></script>
+        <script src="{% static 'js/echarts.min.js' %}"></script>
+    </head>
+
+    <body>
+        <div class="container" style="height: 100vh">
+            <div class="content" style="height: 95%; position: relative; top: 5%">
+                <div class="row" style="height: 100%">
+                    <div class="sidebar col-md-2" style="height: 100%">
+                        <ul style="display: flex; flex-direction: column; gap: 10px; height: 100%">
+                            <li id="menu0" class="menu-item">
+                                <button class="btn btn-outline-primary btnc">图</button>
+                            </li>
+                            <li id="menu1" class="menu-item">
+                                <button class="btn btn-outline-primary btnc">表</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="content col-md-10" style="height: 100%">
+                        <div style="height: 10%">
+                            <label for="data-start">起始日期:</label>
+                            <input class="data-start" type="date" name="username" style="margin-right: 20px" value="{{ start }}" />
+                            <label for="data-end">结束日期:</label>
+                            <input class="data-end" type="date" name="username" style="margin-right: 20px" value="{{ end }}" />
+                            <button class="search btn btn-info" style="width: 12%">查询</button>
+                        </div>
+                        <div class="item" style="height: 90%; display: none">
+                            <div id="chart0" style="height: 49%"></div>
+                            <div id="chart1" style="height: 49%"></div>
+                        </div>
+                        <div class="item" style="height: 90%; display: none">
+                            <div id="table0" style="height: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            var charts = [echarts.init(document.getElementById("chart0")), echarts.init(document.getElementById("chart1"))];
+            var btns = document.querySelectorAll(".btnc");
+            var search_btns = document.querySelectorAll(".search");
+            var tables = document.querySelectorAll("#table0");
+            const sidebar = document.querySelectorAll(".menu-item");
+            const content = document.querySelectorAll(".item");
+            var last_index = parseInt(localStorage.getItem("last_index"));
+            if (last_index == null || isNaN(last_index)) {
+                last_index = 0;
+            }
+
+            window.onload = function () {
+                console.log("Page loaded");
+                btns[last_index].click();
+            };
+
+            window.onresize = function () {
+                for (var i = 0; i < charts.length; i++) {
+                    charts[i].resize();
+                }
+            };
+
+            search_btns.forEach(function (btn, index) {
+                btn.addEventListener("click", function () {
+                    var xmlhttp;
+                    if (window.XMLHttpRequest) {
+                        xmlhttp = new XMLHttpRequest();
+                    } else {
+                        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    xmlhttp.withCredentials = true;
+
+                    btn.textContent = "查询中...";
+                    btn.classList.add("disabled");
+
+                    xmlhttp.onreadystatechange = function () {
+                        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                            var data = JSON.parse(xmlhttp.responseText);
+                            var options = data["chart"];
+                            charts.forEach(function (item, index) {
+                                option = JSON.parse(options[index]);
+                                if (charts[index].getOption()) {
+                                    option["legend"][0]["selected"] = charts[index].getOption()["legend"][0]["selected"];
+                                }
+                                charts[index].setOption(option);
+                                charts[index].resize();
+                            });
+                            tables[0].innerHTML = data["table"];
+                            btn.textContent = "查询";
+                            btn.classList.remove("disabled");
+                        }
+                    };
+
+                    var start = document.querySelector(".data-start").value;
+                    var end = document.querySelector(".data-end").value;
+                    if (Date.parse(end) < Date.parse(start)) {
+                        alert("结束日期不能早于开始日期");
+                        btn.textContent = "查询";
+                        btn.classList.remove("disabled");
+                        return;
+                    }
+                    var url = "/data/?view=test1&start={0}&end={1}".format(start, end);
+                    xmlhttp.open("GET", url, true);
+                    xmlhttp.send()
+                });
+            });
+
+            btns.forEach(function (item, index) {
+                item.addEventListener("click", function () {
+                    content[last_index].style.display = "none";
+                    sidebar[last_index].style.color = "black";
+                    btns[last_index].classList.add("btn-outline-primary");
+                    btns[last_index].classList.remove("btn-primary");
+
+                    content[index].style.display = "block";
+                    sidebar[index].style.color = "red";
+                    btns[index].classList.add("btn-primary");
+                    btns[index].classList.remove("btn-outline-primary");
+                    charts.forEach(function (item, index) {
+                        charts[index].resize();
+                    });
+                    last_index = index;
+                    localStorage.setItem("last_index", index);
+                });
+            });
+        </script>
+    </body>
+</html>

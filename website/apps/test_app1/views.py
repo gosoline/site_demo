@@ -61,9 +61,9 @@ def get_data(request: HttpRequest) -> HttpResponse:
         y_label_1 = '故障次数'
         context['chart'] = []
         df = df.sort_values(by=y_label_0, ascending=False)
-        context['chart'].append(bar_json(df[['故障名称', y_label_0]], y_label_0))
+        context['chart'].append(bar_json(df[['故障名称_中文', y_label_0]], y_label_0))
         df = df.sort_values(by=y_label_1, ascending=False)
-        context['chart'].append(bar_json(df[['故障名称', y_label_1]], y_label_1))
+        context['chart'].append(bar_json(df[['故障名称_中文', y_label_1]], y_label_1))
         context['id'] = 1
         # 打包为json，回传
         context = json.dumps(context)

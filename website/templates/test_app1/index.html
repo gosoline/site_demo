@@ -1,0 +1,21 @@
+<!-- @format -->
+
+{% extends 'test_app1/_template.html' %} {% block content %}
+<head>
+    <title>首页</title>
+</head>
+<div class="container" style="height: 100vh">
+    <header>
+        <h1>欢迎来到我的网站</h1>
+        <nav>
+            <ul>
+                <li><a href="/fault_statistics" target="_blank">故障统计</a></li>
+                <li><a href="/vibration_analysis" target="_blank">振动分析</a></li>
+            </ul>
+        </nav>
+    </header>
+    <footer>
+        <p>&copy; 2023 我的公司. 保留所有权利。</p>
+    </footer>
+</div>
+{% endblock %}

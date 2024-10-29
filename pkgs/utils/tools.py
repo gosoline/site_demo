@@ -9,7 +9,11 @@ from loguru import logger
 class HiddenPrints:
 
     def __init__(self, hide: bool = True):
-        self.hide = hide
+        self.__hide = hide
+
+    @property
+    def hide(self):
+        return self.__hide
 
     def __enter__(self):
         if self.hide:
@@ -17,6 +21,10 @@ class HiddenPrints:
             sys.stdout = open(os.devnull, 'w')
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.hide:
+            self.restore_output()
+
+    def restore_output(self):
         if self.hide:
             sys.stdout.close()
             sys.stdout = self._original_stdout

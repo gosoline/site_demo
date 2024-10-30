@@ -165,3 +165,7 @@ cython_debug/
 temp/*
 # log files
 logs/*
+
+
+# just for keeping empty folders
+!.gitkeep

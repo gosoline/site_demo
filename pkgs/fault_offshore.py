@@ -29,7 +29,7 @@ class FaultStatisticsOffshore:
             'PitchPosition': '俯仰角',
             'PowerSetPoint': '功率设定值',
             'Res': '复位时间',
-            'Error': '持续时间'
+            'Error': '持续时间',
         }
         self.fault_map_df = self.get_map(fault_map_path)
 
@@ -54,12 +54,12 @@ class FaultStatisticsOffshore:
                         )
                         df_list.append(df)
                 except:
-                        print_exc()
+                    print_exc()
         df = pd.concat(df_list, axis=0, ignore_index=True)
         df.columns = self.header.values()
-        df[['触发时间', '故障描述_英文', '复位时间',
-            '持续时间']] = df[['触发时间', '故障描述_英文', '复位时间',
-                           '持续时间']].apply(lambda x: x.str.strip())
+        df[['触发时间', '故障描述_英文', '复位时间', '持续时间']] = df[
+            ['触发时间', '故障描述_英文', '复位时间', '持续时间']
+        ].apply(lambda x: x.str.strip())
         df['持续时间'] = -pd.to_timedelta(df['持续时间'])
         df = df[df['持续时间'] > pd.to_timedelta(0)]
         df['故障代码'] = df['故障描述_英文'].str.split('_SC_', expand=True)[0]
@@ -68,15 +68,23 @@ class FaultStatisticsOffshore:
         df['故障等级'] = self.fault_map_df.loc[df['故障代码'], '故障等级']
 
         result_df = pd.DataFrame(
-            columns=['故障代码', '故障描述_英文', '故障描述_中文', '故障次数', '持续时间'])
+            columns=[
+                '故障代码',
+                '故障描述_英文',
+                '故障描述_中文',
+                '故障次数',
+                '持续时间',
+            ]
+        )
         for error_code, group in df.groupby(df['故障代码']):
             result_df.loc[error_code, '故障代码'] = error_code
             result_df.loc[error_code, '故障描述_英文'] = group['故障描述_英文'].iloc[0]
             result_df.loc[error_code, '故障描述_中文'] = group['故障描述_中文'].iloc[0]
             result_df.loc[error_code, '故障等级'] = group['故障等级'].iloc[0]
             result_df.loc[error_code, '故障次数'] = len(group)
-            result_df.loc[error_code,
-                          '持续时间'] = group['持续时间'].sum().total_seconds() / 3600
+            result_df.loc[error_code, '持续时间'] = (
+                group['持续时间'].sum().total_seconds() / 3600
+            )
         return result_df
 
     def get_map(self, fault_map_path: str | Path) -> pd.DataFrame:
@@ -94,16 +102,17 @@ class FaultStatisticsOffshore:
 
     @staticmethod
     def get_map_csv():
-        df = pd.read_excel(r"D:\Users\117483\桌面\海上项目场控点表-20240606.xlsx",
-                           sheet_name='风机故障代码表')
-        df.rename(columns={
-            '故障描述': '故障描述_中文',
-            '故障描述.1': '故障描述_英文'
-        },
-                  inplace=True)
-        df[['故障描述_中文',
-            '故障描述_英文']] = df[['故障描述_中文',
-                              '故障描述_英文']].apply(lambda x: x.str.strip())
+        df = pd.read_excel(
+            r"D:\Users\117483\桌面\海上项目场控点表-20240606.xlsx",
+            sheet_name='风机故障代码表',
+        )
+        df.rename(
+            columns={'故障描述': '故障描述_中文', '故障描述.1': '故障描述_英文'},
+            inplace=True,
+        )
+        df[['故障描述_中文', '故障描述_英文']] = df[
+            ['故障描述_中文', '故障描述_英文']
+        ].apply(lambda x: x.str.strip())
         df['故障代码'] = df['故障描述_英文'].str.split('_SC_', expand=True)[0]
         df.index = df['故障代码']
         df.to_csv(r'./config/风机故障代码表.csv', index=False, quoting=csv.QUOTE_ALL)

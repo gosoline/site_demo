@@ -25,25 +25,19 @@ def index(request: HttpRequest) -> HttpResponse:
 
 def fault_statistics(request: HttpRequest) -> HttpResponse:
     context = {
-        'start':
-        (pd.to_datetime('now') - pd.to_timedelta('61d')).strftime('%Y-%m-%d'),
-        'end':
-        (pd.to_datetime('now') - pd.to_timedelta('1d')).strftime('%Y-%m-%d'),
+        'start': (pd.to_datetime('now') - pd.to_timedelta('61d')).strftime('%Y-%m-%d'),
+        'end': (pd.to_datetime('now') - pd.to_timedelta('1d')).strftime('%Y-%m-%d'),
     }
     return render(request, 'test_app1/fault_statistics.html', context=context)
 
 
 def vibration_analysis(request: HttpRequest) -> HttpResponse:
     context = {
-        'start':
-        (pd.to_datetime('now') - pd.to_timedelta('61d')).strftime('%Y-%m-%d'),
-        'end':
-        (pd.to_datetime('now') - pd.to_timedelta('1d')).strftime('%Y-%m-%d'),
+        'start': (pd.to_datetime('now') - pd.to_timedelta('61d')).strftime('%Y-%m-%d'),
+        'end': (pd.to_datetime('now') - pd.to_timedelta('1d')).strftime('%Y-%m-%d'),
     }
 
-    return render(request,
-                  'test_app1/vibration_analysis.html',
-                  context=context)
+    return render(request, 'test_app1/vibration_analysis.html', context=context)
 
 
 def get_data(request: HttpRequest) -> HttpResponse:
@@ -67,8 +61,8 @@ def get_data(request: HttpRequest) -> HttpResponse:
         # lose_file = df['lose_file'].iloc[-1]
         df = df.drop(df.index[-1], axis=0).drop('lose_file', axis=1)
         df['timedelta'] = (
-            pd.to_timedelta(df['timedelta']).dt.total_seconds() /
-            3600).round(2)
+            pd.to_timedelta(df['timedelta']).dt.total_seconds() / 3600
+        ).round(2)
         df = df.rename(
             columns={
                 'wt_id': '风机编号',
@@ -82,16 +76,15 @@ def get_data(request: HttpRequest) -> HttpResponse:
         )[['风机编号', '故障代码', '故障名称_中文', '故障名称_英文', '故障次数', '故障时间(小时)']]
 
         context['table'] = df.to_html(
-            classes='table table-bordered table-hover', index=False)
+            classes='table table-bordered table-hover', index=False
+        )
         y_label_0 = '故障时间(小时)'
         y_label_1 = '故障次数'
         context['chart'] = []
         df = df.sort_values(by=y_label_0, ascending=False)
-        context['chart'].append(bar_json(df[['故障名称_中文', y_label_0]],
-                                         y_label_0))
+        context['chart'].append(bar_json(df[['故障名称_中文', y_label_0]], y_label_0))
         df = df.sort_values(by=y_label_1, ascending=False)
-        context['chart'].append(bar_json(df[['故障名称_中文', y_label_1]],
-                                         y_label_1))
+        context['chart'].append(bar_json(df[['故障名称_中文', y_label_1]], y_label_1))
         context['id'] = 1
         # 打包为json，回传
         context = json.dumps(context)
@@ -112,16 +105,19 @@ def get_data(request: HttpRequest) -> HttpResponse:
         df['持续时间'] = df['持续时间'].astype(float).round(2)
         df = df[df['持续时间'] > 0.1]
         context['table'] = df.to_html(
-            classes='table table-bordered table-hover', index=False)
+            classes='table table-bordered table-hover', index=False
+        )
 
         context['chart'] = []
         df = df.sort_values(by='持续时间', ascending=False)
         context['chart'].append(
-            bar_json(df[['故障描述_中文', '持续时间']].head(10), '故障时间(小时)'))
+            bar_json(df[['故障描述_中文', '持续时间']].head(10), '故障时间(小时)')
+        )
 
         df = df.sort_values(by='故障次数', ascending=False)
         context['chart'].append(
-            bar_json(df[['故障描述_中文', '故障次数']].head(10), '故障次数'))
+            bar_json(df[['故障描述_中文', '故障次数']].head(10), '故障次数')
+        )
         context['id'] = 1
         # 打包为json，回传
         context = json.dumps(context)
@@ -133,8 +129,7 @@ def get_data(request: HttpRequest) -> HttpResponse:
         end = str(request.GET['end'])
         context['chart'] = []
         df = pd.DataFrame()
-        df['时间'] = pd.date_range(start=start, end=end,
-                                 freq='1d').strftime('%Y-%m-%d')
+        df['时间'] = pd.date_range(start=start, end=end, freq='1d').strftime('%Y-%m-%d')
         df['1p频率'] = np.random.randint(0, 100, len(df))
         df['3p频率'] = np.random.randint(0, 100, len(df))
         context['chart'].append(
@@ -142,6 +137,7 @@ def get_data(request: HttpRequest) -> HttpResponse:
                 df.drop(columns=['时间']),
                 df['时间'].to_list(),
                 title='振动频率',
-            ))
+            )
+        )
         context = json.dumps(context)
         return HttpResponse(context)

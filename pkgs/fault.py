@@ -29,8 +29,8 @@ def time_at(dt: pd.Timestamp | str, step: pd.Timedelta | str) -> pd.Timestamp:
     dt: pd.DatetimeIndex = pd.to_datetime([dt])
     step: pd.Timedelta = pd.Timedelta(step)
     t = pd.to_datetime(
-        ((dt.astype('int64') // 10**9) // int(step.total_seconds())) *
-        int(step.total_seconds()),
+        ((dt.astype('int64') // 10**9) // int(step.total_seconds()))
+        * int(step.total_seconds()),
         unit='s',
     )[0]
     return t
@@ -50,12 +50,25 @@ class FaultStatistics:
     '''停机 `OC_BrakeProgramActive`'''
     # 故障包含信息list
     _fault_info = [
-        'wt_id', 'file_name', 'stop_row', 'fault_row', 'stop_time',
-        'fault_time', 'code', 'fault_en', 'fault_cn', 'timedelta'
+        'wt_id',
+        'file_name',
+        'stop_row',
+        'fault_row',
+        'stop_time',
+        'fault_time',
+        'code',
+        'fault_en',
+        'fault_cn',
+        'timedelta',
     ]
     _fault_simple_info = [
-        'wt_id', 'code', 'count', 'fault_en', 'fault_cn', 'timedelta',
-        'lose_file'
+        'wt_id',
+        'code',
+        'count',
+        'fault_en',
+        'fault_cn',
+        'timedelta',
+        'lose_file',
     ]
 
     def __init__(
@@ -145,8 +158,9 @@ class FaultStatistics:
         # 去除数据前后空白字符
         df = df.map(lambda e: e.strip())
         # 时间列转化为Timestamp
-        df['time'] = pd.to_datetime(df.pop('TimeStampUTC'),
-                                    format='%d.%m.%Y %H:%M:%S,%f')
+        df['time'] = pd.to_datetime(
+            df.pop('TimeStampUTC'), format='%d.%m.%Y %H:%M:%S,%f'
+        )
         # 将TrigKey列划分为代码列和英文描述列
         df[['code', 'fault_en']] = df.pop('TrigKey').str.split(expand=True)
         # 删除有nan值的行
@@ -160,9 +174,9 @@ class FaultStatistics:
         # 文件名称
         df['file_name'] = file_name
         # 重新排序列
-        df.reindex(columns=[
-            'wt_id', 'file_name', 'row_num', 'time', 'code', 'fault_en'
-        ])
+        df.reindex(
+            columns=['wt_id', 'file_name', 'row_num', 'time', 'code', 'fault_en']
+        )
 
         return df
 
@@ -193,8 +207,7 @@ class FaultStatistics:
         fault_row_list = []
         # 循环查找启机和停机所在行
         for idx in df.index:
-            if df.loc[idx,
-                      'fault_en'] in [self.turbine_start, self.turbine_stop]:
+            if df.loc[idx, 'fault_en'] in [self.turbine_start, self.turbine_stop]:
                 # 判断是否为连续的启机或停机，连续出现视为一次
                 if df.loc[idx, 'fault_en'] != last:
                     fault_row_list.append(idx)
@@ -215,13 +228,16 @@ class FaultStatistics:
 
         i = 0
         while i < len(fault_row_list) - 1:
-            dfx = df.loc[fault_row_list[i]:fault_row_list[i + 1]]
+            dfx = df.loc[fault_row_list[i] : fault_row_list[i + 1]]
             # 风机停机时刻
             turbine_stop_dt = dfx['time'].iloc[0]
             # 首触故障代码所在可能时间（取停机代码出现时间的前后一分钟）
-            first_trigger_df = df[df['time'].between(
-                turbine_stop_dt - pd.Timedelta('60s'),
-                turbine_stop_dt + pd.Timedelta('60s'))]
+            first_trigger_df = df[
+                df['time'].between(
+                    turbine_stop_dt - pd.Timedelta('60s'),
+                    turbine_stop_dt + pd.Timedelta('60s'),
+                )
+            ]
             i = i + 2
             for idx in first_trigger_df.index:
                 val = first_trigger_df.loc[idx, 'fault_en']
@@ -231,7 +247,8 @@ class FaultStatistics:
                     if not self.fault_map_df is None:
                         try:
                             fault_zh = self.fault_map_df.loc[
-                                first_trigger_df.loc[idx, 'code'], '中文描述']
+                                first_trigger_df.loc[idx, 'code'], '中文描述'
+                            ]
                         except:
                             fault_zh = '无中文映射'
                     fault_df.loc[dfx.index[0]] = [
@@ -240,9 +257,9 @@ class FaultStatistics:
                         dfx['row_num'].iloc[0],  # 停机代码所在行
                         first_trigger_df.loc[idx, 'row_num'],  # 首触故障所在行
                         turbine_stop_dt,  # 风机停机时刻
-                        *first_trigger_df.loc[idx,
-                                              ['time', 'code', 'fault_en'
-                                               ]],  # 首触故障时刻，状态代码，状态英文描述
+                        *first_trigger_df.loc[
+                            idx, ['time', 'code', 'fault_en']
+                        ],  # 首触故障时刻，状态代码，状态英文描述
                         fault_zh,  # 状态中文描述
                         dfx['time'].iloc[-1] - dfx['time'].iloc[0],  # 故障持续时长
                     ]
@@ -295,10 +312,10 @@ class FaultStatistics:
         # 将丢失文件加入故障信息数据
         for wt in self.lose_file.keys():
             for dt in self.lose_file[wt]:
-                self.fault_df.loc[self.fault_df.shape[0] + 1,
-                                  ['wt_id', 'file_name']] = [wt, f'{dt}_lose']
-        self.fault_df = self.fault_df[self.fault_df['fault_en'] !=
-                                      'SC_WaitingForWind']
+                self.fault_df.loc[
+                    self.fault_df.shape[0] + 1, ['wt_id', 'file_name']
+                ] = [wt, f'{dt}_lose']
+        self.fault_df = self.fault_df[self.fault_df['fault_en'] != 'SC_WaitingForWind']
 
         self.fault_df['wt_id'] = self.fault_df['wt_id'].astype('int')
         self.fault_df = self.fault_df.sort_values('wt_id')
@@ -313,8 +330,9 @@ class FaultStatistics:
             self.get_fault()
         self.fault_simple_df = pd.DataFrame(columns=self._fault_simple_info)
         for wt_id, dfx in self.fault_df.groupby('wt_id'):
-            lose_file = dfx['file_name'][dfx['file_name'].str.endswith(
-                'lose')].values.tolist()
+            lose_file = dfx['file_name'][
+                dfx['file_name'].str.endswith('lose')
+            ].values.tolist()
             dfx = dfx[~(dfx['file_name'].str.endswith('lose'))]
             # ['wt_id', 'code', 'count', 'fault_en','fault_cn', 'timedelta', 'lose_file']
             for code, dfx1 in dfx.groupby('code'):
@@ -327,11 +345,11 @@ class FaultStatistics:
                     dfx1['timedelta'].sum(),
                     '_',
                 ]
-            self.fault_simple_df.loc[f'{wt_id}&lose',
-                                     'lose_file'] = f"[{','.join(lose_file)}]"
+            self.fault_simple_df.loc[f'{wt_id}&lose', 'lose_file'] = (
+                f"[{','.join(lose_file)}]"
+            )
             self.fault_simple_df.loc[f'{wt_id}&lose', 'wt_id'] = wt_id
-        self.fault_simple_df['wt_id'] = self.fault_simple_df['wt_id'].astype(
-            'int')
+        self.fault_simple_df['wt_id'] = self.fault_simple_df['wt_id'].astype('int')
         self.fault_simple_df.sort_values('wt_id')
         return self.fault_simple_df
         ...
@@ -364,14 +382,13 @@ def fault_control(
     # doc_path = Path('./')
     doc_path.mkdir(0o777, True, True)
     fs.fault_df.to_csv(
-        doc_path /
-        f'fault_{(today - pd.Timedelta("1d")).strftime("%Y%m%d")}.csv',
+        doc_path / f'fault_{(today - pd.Timedelta("1d")).strftime("%Y%m%d")}.csv',
         index=False,
         encoding='gbk',
     )
     fs.fault_simple_df.to_csv(
-        doc_path /
-        f'fault_simple_{(today - pd.Timedelta("1d")).strftime("%Y%m%d")}.csv',
+        doc_path
+        / f'fault_simple_{(today - pd.Timedelta("1d")).strftime("%Y%m%d")}.csv',
         index=False,
         encoding='gbk',
     )

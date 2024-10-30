@@ -50,9 +50,11 @@ class PrintToLogger:
         # s=sys.stdout
         if terminal:
             logger.remove()
-        logger.add("./log/test_{time:YYYY-MM-DD-HH-mm-ss-SSS}.log",
-                   format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
-                   rotation="1 day")
+        logger.add(
+            "./log/test_{time:YYYY-MM-DD-HH-mm-ss-SSS}.log",
+            format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+            rotation="1 day",
+        )
         # 替换 sys.stdout
         sys.stdout = PrintToLogger()
         sys.stderr = PrintToLogger()

@@ -15,7 +15,7 @@ from pkgs.utils.tools import HiddenPrints
 
 def root(request: HttpRequest) -> HttpResponse:
     # 跳转到index页面
-    return redirect('/index')
+    return redirect('/index/')
 
 
 def index(request: HttpRequest) -> HttpResponse:
